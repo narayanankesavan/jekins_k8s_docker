@@ -1,40 +1,41 @@
----
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: hello-blue-whale
+ name: webapp
+ namespace: devproject
+ labels:  #to map it with the service
+  app: web
+  env: dev
 spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: hello-whale-app
-      version: blue
-  template:
-    metadata:
-      name: hello-blue-whale-pod
-      labels:
-        app: hello-whale-app
-        version: blue
-    spec:
-      containers:
-      - name: hello-whale-container
-        image: nara1983/jenkinsdockerimage:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
+ containers:
+ - name: webcon
+   image: nara1983/jenkinsdockerimage:latest
+   imagePullPolicy: Always
+   ports:
+   - containerPort: 80
+     name: apache
+     protocol: TCP
+   resources:
+         requests:
+           memory: "200Mi"
+           cpu: "200m"
+         limits:
+           memory: "300Mi"
+           cpu: "400m"
 ---
 apiVersion: v1
-kind: Service 
+kind: Service
 metadata:
-  name: hello-whale-svc
-  labels:
-    app: hello-whale-app
+ name: websvc   #service name (it can be any name)
+ namespace: devproject
 spec:
-  selector:
-    app: hello-whale-app
-    version: blue
-  type: NodePort
-  ports:
-  - nodePort: 31113
-    port: 80
-    targetPort: 80
+ type: NodePort
+ ports:
+ - name: apache
+   nodePort: 30002 #node port
+   port: 80 #service port
+   targetPort: 80 #container port
+   protocol: TCP
+ selector:     #mapping to pod
+   app: web
+   env: dev
