@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,19 +21,20 @@ spec:
         image: nara1983/jenkinsdockerimage:latest
         imagePullPolicy: Always
         ports:
-          - containerPort: 8181
-        env:
-          - name: PORT
-            value: "8181"
+        - containerPort: 80
 ---
 apiVersion: v1
-kind: Service
+kind: Service 
 metadata:
-  name: hello-whale-app
+  name: hello-whale-svc
+  labels:
+    app: hello-whale-app
 spec:
-  type: LoadBalancer
-  ports:
-    - port: 80
-      targetPort: 8181
   selector:
     app: hello-whale-app
+    version: blue
+  type: NodePort
+  ports:
+  - nodePort: 31113
+    port: 80
+    targetPort: 80
